@@ -41,24 +41,52 @@ target_include_directories(Tutorial PUBLIC
 
 # TODO 3: Install Tutorial in the bin directory
 # Hint: Use the TARGETS and DESTINATION parameters
+install(TARGETS Tutorial
+        DESTINATION "bin")
 
 # TODO 4: Install Tutorial.h to the include directory
 # Hint: Use the FILES and DESTINATION parameters
+install(FILES "${PROJECT_BINARY_DIR}/TutorialConfig.h"
+        DESTINATION "include")
 
 # TODO 5: Enable testing
+enable_testing()
 
 # TODO 6: Add a test called Runs which runs the following command:
 # $ Tutorial 25
+add_test(NAME Runs
+         COMMAND "Tutorial" 25)
 
 # TODO 7: Add a test called Usage which runs the following command:
 # $ Tutorial
 # Make sure the expected output is displayed.
 # Hint: Use the PASS_REGULAR_EXPRESSION property with "Usage.*number"
+add_test(NAME Usage
+         COMMAND "Tutorial")
+set_tests_properties(Usage PROPERTIES
+                     PASS_REGULAR_EXPRESSION "Usage:.*number")
 
 # TODO 8: Add a test which runs the following command:
 # $ Tutorial 4
 # Make sure the result is correct.
 # Hint: Use the PASS_REGULAR_EXPRESSION property with "4 is 2"
+add_test(NAME Verify
+         COMMAND "Tutorial" 4)
+set_tests_properties(Verify PROPERTIES
+                     PASS_REGULAR_EXPRESSION "4 is 2")
 
 # TODO 9: Add more tests. Create a function called do_test to avoid copy +
 # paste. Test the following values: 4, 9, 5, 7, 25, -25 and 0.00001.
+
+function(do_test inputValue outputValue)
+  add_test(NAME "Verify_input_${inputValue}"
+           COMMAND "Tutorial" "${inputValue}")
+  set_tests_properties("Verify_input_${inputValue}" PROPERTIES
+                       PASS_REGULAR_EXPRESSION "${inputValue} is ${outputValue}")
+endfunction()
+
+set(inputValues 4 9 5 7 25 -25 0.0001)
+set(outputValues 2 3 2.236 2.645 5 "(-nan|nan|0)" 0.01)
+foreach(inputValue outputValue IN ZIP_LISTS inputValues outputValues)
+  do_test(${inputValue} ${outputValue})
+endforeach()
